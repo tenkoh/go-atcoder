@@ -21,6 +21,7 @@ func Test_solve(t *testing.T) {
 		{"3", args{s: "snuke", t: "RNG"}, false},
 		{"4", args{s: "aoyama", t: "AAA"}, true},
 		{"too long", args{s: strings.Repeat("nagoya", 10000), t: "NGY"}, true},
+		{"wrong order", args{s: "nagoya", t: "YGN"}, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
