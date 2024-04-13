@@ -11,20 +11,19 @@ func solve(s, t string) bool {
 	bs := []byte(s)
 	bt := []byte(strings.ToLower(t))
 
-	mbs := map[byte]int{}
+	var pos int
 	for _, v := range bs {
-		mbs[v]++
-	}
-	for i, v := range bt {
-		if i == 2 && v == 'x' {
-			return true
+		if v == bt[pos] {
+			pos++
+			if pos == 2 && bt[2] == 'x' {
+				return true
+			}
+			if pos == 3 {
+				return true
+			}
 		}
-		if mbs[v] == 0 {
-			return false
-		}
-		mbs[v]--
 	}
-	return true
+	return false
 }
 
 func main() {
