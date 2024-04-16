@@ -2,7 +2,10 @@ package main
 
 import (
 	"bufio"
+	"container/list"
+	"fmt"
 	"io"
+	"os"
 	"strconv"
 	"strings"
 )
@@ -32,33 +35,42 @@ type point struct {
 
 var seen = map[point]int{}
 
-func dfs2(m [][]byte, ecans map[point]int, p point, e int) {
-	for _, d := range []point{{0, 1}, {0, -1}, {1, 0}, {-1, 0}} {
-		np := point{p.hi + d.hi, p.wi + d.wi}
-		// 探索済みかつその時のエネルギーが現在のエネルギーより小さい場合はスキップ
-		if v := seen[np]; v >= 0 && v <= e-1 {
-			continue
-		}
-		if np.hi < 0 || np.hi >= len(m) || np.wi < 0 || np.wi >= len(m[0]) {
-			continue
-		}
-		if m[np.hi][np.wi] == '#' {
-			continue
-		}
-		dfs(m, ecans, np, e-1)
+func bfs(m [][]byte, ecans map[point]int, sp point) {
+	// 最初にエネルギーが得られなかった場合は終了
+	e := ecans[sp]
+	seen[sp] = e
+	if e == 0 {
+		return
 	}
-}
+	q := list.New()
+	q.PushBack(sp)
 
-func dfs(m [][]byte, ecans map[point]int, p point, e int) {
-	charged := ecans[p]
-	if charged > e {
-		e = charged
-	}
-
-	seen[p] = e
-
-	if e > 0 {
-		dfs2(m, ecans, p, e)
+	for q.Len() > 0 {
+		p := q.Remove(q.Front()).(point)
+		for _, d := range []point{{0, 1}, {0, -1}, {1, 0}, {-1, 0}} {
+			np := point{p.hi + d.hi, p.wi + d.wi}
+			if np.hi < 0 || np.hi >= len(m) || np.wi < 0 || np.wi >= len(m[0]) {
+				continue
+			}
+			if m[np.hi][np.wi] == '#' {
+				continue
+			}
+			// 次の点でのエネルギー
+			e := seen[p] - 1
+			charged, exist := ecans[np]
+			if exist && charged > e {
+				e = charged
+			}
+			if e < 0 {
+				continue
+			}
+			// 未探索またはエネルギーがより大きくできるときは探索
+			if v := seen[np]; v < 0 || v < e {
+				seen[np] = e
+				q.PushBack(np)
+				continue
+			}
+		}
 	}
 }
 
@@ -73,6 +85,7 @@ func solve(r io.Reader) bool {
 		sc.Scan()
 		m[hi] = []byte(sc.Text())
 		for wi := 0; wi < w; wi++ {
+			seen[point{hi, wi}] = -1
 			if m[hi][wi] == 'S' {
 				sp = point{hi, wi}
 			}
@@ -90,16 +103,20 @@ func solve(r io.Reader) bool {
 		ecans[point{hi - 1, wi - 1}] = e
 	}
 
-	for hi := 0; hi < h; hi++ {
-		for wi := 0; wi < w; wi++ {
-			seen[point{hi, wi}] = -1
-		}
-	}
-
 	// 深さ優先探索
-	dfs(m, ecans, sp, 0)
+	// dfs(m, ecans, sp, 0)
+	bfs(m, ecans, sp)
 	if v := seen[tp]; v == -1 {
 		return false
 	}
 	return true
+}
+
+func main() {
+	reachable := solve(os.Stdin)
+	if reachable {
+		fmt.Println("Yes")
+		return
+	}
+	fmt.Println("No")
 }

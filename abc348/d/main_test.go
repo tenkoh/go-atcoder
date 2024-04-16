@@ -18,6 +18,16 @@ S...
 3 2 1
 2 3 1
 `
+	s3 := `4 5
+..#..
+.S##.
+.##T.
+.....
+3
+3 1 5
+1 2 3
+2 2 1
+`
 	type args struct {
 		r io.Reader
 	}
@@ -28,6 +38,7 @@ S...
 	}{
 		// TODO: Add test cases.
 		{"1", args{r: strings.NewReader(s1)}, true},
+		{"3", args{r: strings.NewReader(s3)}, true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
