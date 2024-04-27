@@ -60,12 +60,31 @@ func solve(r io.Reader) int {
 	}
 
 	maxDist := 1
+	// 計算量削減のためにスキップ可能な頂点を記録
+	canSkip := map[coord]struct{}{}
 	// 各頂点から辿り着ける頂点の数を、その頂点自身も含めて数える
 	for start := range g {
+		if _, ok := canSkip[start]; ok {
+			continue
+		}
 		visited := map[coord]bool{}
 		var dfs func(coord)
 		dfs = func(v coord) {
 			visited[v] = true
+			hasMagnets := false
+			for _, d := range []coord{{-1, 0}, {1, 0}, {0, -1}, {0, 1}} {
+				ni, nj := v.hi+d.hi, v.wi+d.wi
+				if ni < 0 || ni >= h || nj < 0 || nj >= w {
+					continue
+				}
+				if m[ni][nj] == '#' {
+					hasMagnets = true
+					break
+				}
+			}
+			if !hasMagnets {
+				canSkip[v] = struct{}{}
+			}
 			for _, u := range g[v] {
 				if visited[u] {
 					continue
