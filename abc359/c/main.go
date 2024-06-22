@@ -8,49 +8,33 @@ import (
 )
 
 func solve(sx, sy, tx, ty int) int {
-	// 初期化。
-	if sx < tx {
-		if sy != ty && (sx+sy)%2 == 0 {
-			sx++
-		}
-		if sy == ty && (sx+sy)%2 != 0 {
-			sx--
-		}
-		if (tx+ty)%2 != 0 {
-			tx--
-		}
-	} else if sx > tx {
-		if sy != ty && (sx+sy)%2 != 0 {
-			sx--
-		}
-		if sy == ty && (sx+sy)%2 == 0 {
-			sx++
-		}
-		if (tx+ty)%2 == 0 {
-			tx++
-		}
+	// 初期化：タイルの左端に寄せておく
+	if (sx+sy)%2 != 0 {
+		sx--
+	}
+	if (tx+ty)%2 != 0 {
+		tx--
 	}
 
-	// ty-txの数だけカウントを増やす
 	var count int
-	dy := ty - sy
-	if dy < 0 {
-		dy *= -1
-	}
-	count += dy
+	count += absint(sy - ty)
 
 	if sx == tx {
 		return count
 	}
 
-	dx := tx - sx
-	if dx < 0 {
-		dx *= -1
-	}
-	if dx < count {
+	dx := absint(sx - tx)
+	if dx <= count {
 		return count
 	}
-	return count + dx/2
+	return count + (dx-count)/2
+}
+
+func absint[T int | int32 | int64](x T) T {
+	if x < 0 {
+		return -x
+	}
+	return x
 }
 
 func scan1(sc *bufio.Scanner) int {
@@ -62,7 +46,6 @@ func scan1(sc *bufio.Scanner) int {
 func main() {
 	sc := bufio.NewScanner(os.Stdin)
 	sc.Split(bufio.ScanWords)
-	sc.Buffer(make([]byte, 10000), 1000000)
 	sx := scan1(sc)
 	sy := scan1(sc)
 	tx := scan1(sc)
